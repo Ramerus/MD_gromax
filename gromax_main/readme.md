@@ -3,6 +3,7 @@
 * download information about your system
 * calculate contact angles with accuracy 2.5 degrees
 * calculate density profile for systems with minerals and without
+* сheck the system for clusters ( it is set to search for clusters in aroma components)
   
 ## To use the library for your experiments you need:
 * trappe.top file of your system

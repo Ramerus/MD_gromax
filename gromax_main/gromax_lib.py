@@ -51,20 +51,7 @@ def density_profiles(exp_data, system_data, dx, num_files, type, solid = 0):
         den_alkane += den_alk/num_files
         den_salt += den_s/num_files
         den_methane += den_met/num_files
-    '''
-    if type == 'ift':
-        approx_middle = (zs-dx)/2
-        aro_num_left =  list(enumerate(den_aro, 0))
-        left_aro = max(aro_num_left[:int(approx_middle/dx)], key=lambda i : i[1])[0]
-        right_aro = max(aro_num_left[int(approx_middle/dx):], key=lambda i : i[1])[0]
-        true_middle = left_aro+right_aro
-        den_water = mas_remake(true_middle, den_water)
-        den_aro = mas_remake(true_middle, den_aro)
-        den_alkane = mas_remake(true_middle, den_alkane)
-        den_salt = mas_remake(true_middle, den_salt)
-        den_methane = mas_remake(true_middle, den_methane)    
-    '''
-    #print(dx*xs*ys)
+
     return den_water, den_aro, den_alkane, den_salt, den_methane
 
 def forcefield_loader():
@@ -95,24 +82,21 @@ def find_files(exp_path, dir, type):
     out:
     files -- all files with needed type in path
     '''
-    #chdir(exp_path)
+    
     chdir(join(exp_path,dir))
     path = join(exp_path,dir)
     files = listdir(join(path))
     files = [f for f in listdir(path) if (isfile(join(path, f))) and (('.'+type) in f)]
-    #print(files)
+    
     return files
 
 def composition(exp_path, dir):
     chdir(join(exp_path,dir))
     path = join(exp_path,dir)
     files = listdir(join(path))
-    #print(files)
     files = [f for f in listdir(path) if (isfile(join(path, f))) and (('system') in f)]
     name = []
     number = []
-    #print(files)
-    #exit()
     with open(files[0]) as F:
         x = F.readline()
         while '[ molecules ]' not in x:
@@ -188,13 +172,9 @@ def dens_map_1d(xs, ys, zs, dd, system_data, solid=0, dx=0.4, dz=0.4, type = 'if
     zmax = zs - z0 # max z coord for atoms
     if type == 'ift':
         v_slice = dx*xs*ys #volume of one slice
-        #zmax = zmax+dz
-        #density profile of simulation
         den_water = np.zeros(m.floor(zmax/dx))
-    
         den_aro = np.zeros((m.floor(zmax/dx))) 
         den_alkane = np.zeros((m.floor(zmax/dx))) 
-    
         den_salt = np.zeros((m.floor(zmax/dx)))
         den_methane = np.zeros((m.floor(zmax/dx)))
     
@@ -213,7 +193,6 @@ def dens_map_1d(xs, ys, zs, dd, system_data, solid=0, dx=0.4, dz=0.4, type = 'if
                 den_methane[z] += system_data[i][1]
     elif type == 'angle':
         v_slice = dx*zmax*ys #volume of one slice
-        #density profile of simulation
         den_water = np.zeros(m.floor(xs/dx))
     
         den_aro = np.zeros((m.floor(xs/dx))) 
@@ -249,7 +228,6 @@ def mas_remake(middle, mass):
     ans = []
     k = 1
     while (l >= 0) and (r<=n-1):
-        #print(l, r)
         ans.append(0.5*(mass[l]+mass[r]))
         l -= 1
         r += 1
@@ -261,7 +239,6 @@ def mas_remake(middle, mass):
         if (middle % 2 == 0):
             l = r = int(middle*0.5)
         while (l >= 0) and (r<=n-1):
-            #print(l, r)
             ans.append(0.5*(mass[l]+mass[r]))
             l -= 1
             r += 1
@@ -273,39 +250,29 @@ def mas_remake(middle, mass):
         if (middle % 2 == 0):
             l = r = int(middle*0.5)
         while (l >= 0) and (r<=n-1):
-            #print(l, r)
             ans.append(0.5*(mass[l]+mass[r]))
             l -= 1
             r += 1
     return ans
 
 def dens_show_1d(den_water, den_aro, den_alkane, den_salt, den_methane, zs, file, dx=0.4):
-    #sns.set()  
     fig = plt.figure(figsize=(10, 5))
 
     ax = fig.add_subplot(1, 1, 1)
     ax.set_ylim(0, 1.4)
-    #ax.set_xlim(0.5, 5.)
-    #ax.set_title(file.replace(".gro", "%_profile"), loc="left", fontstyle='italic', fontsize=16)
     ax.set_title(r"$CH_4 = 5\%$", loc="left", fontstyle='italic', fontsize=16)
     ax.set_xlabel('x[nm]')
     ax.set_ylabel(r'${\rho}[g/cm^3]$')
-    #x = np.arange(0, dx*(len(den_water)), dx)
     x = np.array(list(range(len(den_water))))*dx
-    #print(x.shape, len(den_water), dx)
-    #x = zs
     ax.plot(x, den_water, '-', color ='tab:blue', label='Water')
-    #ax.plot(x, den_oil/np.mean(den_oil), '-', color ='tab:grey', label='Oil')
     ax.plot(x, den_aro, '-', color ='y', label='Aromatic')
     ax.plot(x, den_alkane, '-', color ='tab:grey', label='Alkane')
-    #ax.plot(x, den_salt, '-', color ='tab:green', label='Salt')
     ax.plot(x, den_methane, '-', color ='red', label='Methane')
     ax.legend()
 # change the color of the top and right spines to opaque gray
     ax.spines['right'].set_color((.8,.8,.8))
     ax.spines['top'].set_color((.8,.8,.8))
     # tweak the axis labels
-    #ax.grid('on')
     plt.yticks(fontsize=16)
     plt.xticks(fontsize=16)
     xlab = ax.xaxis.get_label()
@@ -318,12 +285,8 @@ def dens_show_1d(den_water, den_aro, den_alkane, den_salt, den_methane, zs, file
     ttl = ax.title
     ttl.set_weight('bold')
     ttl.set_size(16)
-
     fig.tight_layout()
-    
     file_save = file + ".jpg"
-    #plt.show()
-    
     plt.savefig(file_save, dpi= 600)
     plt.close()    
     return
@@ -345,7 +308,7 @@ def aromatic_data(composition, coords, system_data):
     x = []
     y = []
     z = []
-    exp_path = 'C:\\Users\\peter\\Desktop\\files\\my_soft\\density_profile'
+    exp_path = 'path to exp'
     mol_length = pd.read_excel(exp_path+'\\mol_length.xlsx')
     
     aromatic = ['perylene', 'trimetphen', 'pyrene', 'phenanthrene', 'dinaphtalene', 'propbenz', 'toluene']
@@ -400,7 +363,6 @@ class circle_fit():
         # coordinates of the barycenter
         x_m = mean(self.x)
         y_m = mean(self.y)
-        #print(x_m, y_m)
         center_estimate = x_m, y_m
         
         center_2b, ier = sc.optimize.leastsq(self.f_2b, center_estimate, Dfun=self.Df_2b, col_deriv=True)

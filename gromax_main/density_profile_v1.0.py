@@ -5,8 +5,8 @@ from MDAnalysis.coordinates.XTC import XTCReader
 To use this script you should have xtc file with trajectories
 and at least 1 gro file of your system
 '''
-exp_path = 'C:\\Users\\peter\\Desktop\\files\\my_soft\\drop_lib\\quartz_methane'
-#exp_path = 'C:\\Users\\peter\\Desktop\\files\\my_soft\\density_profile'
+exp_path = 'path to experiment'
+
 dx = 0.12
 dir = '10'
 file_type = 'xtc'
@@ -28,8 +28,10 @@ except:
     exit()
 den_w, den_ar, den_alk, den_s, den_met = gl.density_profiles(exp_data, system_data, dx, num_files, type = 'angle', solid = solid)
 gl.dens_show_1d(den_w, den_ar, den_alk,  den_s, den_met, exp_data[0].dimensions[1]*0.1+dx, fig_name, dx = dx)
-#exit()
-'''calculating dissolewed components
+
+'''
+IF YOU NEED TO CALCULATE PPMS
+calculating dissolewed components 
 w_in_oil = 0
 alk_in_w = 0
 met_in_w = 0
